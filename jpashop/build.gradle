@@ -22,7 +22,7 @@ repositories {
 }
 
 dependencies {
-	// 외부 라일
+	// 외부 라이브러리(p6spy): Query와 Parameter를 매칭해주는 log를 남겨줌.
 	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
