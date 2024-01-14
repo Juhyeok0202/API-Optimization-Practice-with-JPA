@@ -35,4 +35,12 @@ public class Category {
 
     @OneToMany(mappedBy = "parent")
     private List<Category> child;
+
+
+    // 양방향일 때!! 양쪽 세팅하는 것을 atomic하게 해결.
+    //==연관관계 (편의)메서드--⚠️핵심적으로 컨트롤하는 쪽이 들고 있는 것이 Good//
+    public void addChildCategory(Category child) {
+        this.child.add(child); //부모 입장에서의 자식 세팅
+        child.setParent(this); //자식 입장에서의 부모 세팅
+    }
 }
