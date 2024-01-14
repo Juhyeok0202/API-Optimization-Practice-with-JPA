@@ -33,9 +33,10 @@ public class MemberRepository {
                 .getResultList();
     }
 
+    //💡[내생각] 해당 컬럼을 Unique로 제약하고, service계층에서 validation 과정을 거치기에 굳이 List로 받을 필요는 없다고 느껴진다.
     public List<Member> findByName(String name) {
         return em.createQuery("select m from Member m where m.name = : name", Member.class)
                 .setParameter("name",name) // Parameter Binding 해주어야함.(JPQL)
-                .getResultList();
+                .getResultList(); // getSingleResult();로 처리하는 것이 더 나은 방법인 것 같다.
     }
 }
