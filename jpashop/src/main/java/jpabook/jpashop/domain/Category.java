@@ -8,6 +8,8 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static jakarta.persistence.FetchType.LAZY;
+
 @Entity
 @Getter
 @Setter
@@ -27,7 +29,7 @@ public class Category {
     private List<Item> items = new ArrayList<>();
 
     /* Recursive Mapping */
-    @ManyToOne
+    @ManyToOne(fetch = LAZY) // ⚠️ XToOne은 default fetch 전략이 EAGER => JPA n+1 문제 발생
     @JoinColumn(name = "parent_id")
     private Category parent;
 

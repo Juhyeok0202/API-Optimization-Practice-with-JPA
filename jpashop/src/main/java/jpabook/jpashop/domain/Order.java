@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static jakarta.persistence.FetchType.LAZY;
+
 @Entity
 @Table(name = "orders") // DB 예약어와 겹치는 문제로 orders라고 사용
 @Getter @Setter
@@ -18,14 +20,14 @@ public class Order {
     @Column(name = "order_id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = LAZY) // ⚠️ XToOne은 default fetch 전략이 EAGER => JPA n+1 문제 발생
     @JoinColumn(name = "member_id") //FK명이 member_id. (매핑할 엔티티의 PK 명을 관례적으로 사용)
     private Member member;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order") // XToMany는 default fetch 전략이 LAZY임.
     private List<OrderItem> orderItems = new ArrayList<>();
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY) // ⚠️ XToOne은 default fetch 전략이 EAGER => JPA n+1 문제 발생
     @JoinColumn(name = "delivery_id")
     private Delivery delivery;
 
