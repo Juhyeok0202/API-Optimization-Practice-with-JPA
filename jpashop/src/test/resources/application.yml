@@ -1,0 +1,22 @@
+spring:
+  #🌟SpringBoot는 별도의 설정 X => 자체적으로 Memory mode로 돌림
+  #🌟 yml 따로 가져가는게 좋음
+#  datasource:
+#    url: jdbc:h2:mem:test # In-Memory Mode
+#    username: sa
+#    password:
+#    driver-class-name: org.h2.Driver
+#
+#  jpa:
+#    hibernate:
+#      ddl-auto: create # application ?? ??? ???? ??
+#    properties:
+#      hibernate:
+##        show_sql: true #sysout?? ?? -> logger? ??? ???? ????!
+#        format_sql: true
+
+logging:
+  level:
+    org.hibernate.SQL: debug #logger? ??? ??
+    # org.hibernate.type: trace #스프링 부트 2.x, hibernate5
+    org.hibernate.orm.jdbc.bind: trace

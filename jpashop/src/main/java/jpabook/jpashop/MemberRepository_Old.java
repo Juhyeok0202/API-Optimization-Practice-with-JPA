@@ -6,7 +6,7 @@ import jpabook.jpashop.domain.Member;
 import org.springframework.stereotype.Repository;
 
 @Repository //Component Scan이 되는 대상이 되도록
-public class MemberRepository {
+public class MemberRepository_Old {
 
     @PersistenceContext
     private EntityManager em;
