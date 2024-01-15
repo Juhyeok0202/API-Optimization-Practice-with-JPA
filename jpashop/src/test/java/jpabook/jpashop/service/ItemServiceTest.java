@@ -83,7 +83,7 @@ public class ItemServiceTest {
         assertThat(item2.getStockQuantity()).isEqualTo(0);
     }
 
-    @Test(expected = NotEnoughStockException.class)
+    @Test(expected = NotEnoughStockException.class) //예외를 감지하는 것이 좋음(💡AssertThatThrownBy 공부해볼 💡)
     public void 수량_감소_예외_발생() throws Exception {
         //given
         Item item = new Book();
