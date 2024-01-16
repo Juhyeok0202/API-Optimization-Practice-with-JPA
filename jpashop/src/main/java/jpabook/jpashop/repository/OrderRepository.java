@@ -23,7 +23,7 @@ public class OrderRepository {
         return em.find(Order.class, id);
     }
 
-    public List<Order> findAll(OrderSearch orderSearch) { // 검색 조건에 동적으로 쿼리를 생성해서 주문 엔티티를 조회한다.
+    public List<Order> findAllByString(OrderSearch orderSearch) { // 검색 조건에 동적으로 쿼리를 생성해서 주문 엔티티를 조회한다.
 //language=JPAQL
         String jpql = "select o From Order o join o.member m";
         boolean isFirstCondition = true;
