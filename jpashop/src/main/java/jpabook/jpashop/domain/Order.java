@@ -1,7 +1,9 @@
 package jpabook.jpashop.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -9,11 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static jakarta.persistence.FetchType.LAZY;
+import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @Table(name = "orders") // DB 예약어와 겹치는 문제로 orders라고 사용
-@Getter
-@Setter
+@Getter @Setter
+@NoArgsConstructor(access = PROTECTED) //생성 메서드 사용하도록 유도
 public class Order {
 
     @Id
