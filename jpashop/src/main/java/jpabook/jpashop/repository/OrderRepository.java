@@ -89,4 +89,6 @@ public class OrderRepository {
 
         return query.getResultList();
     }
+
+    /*결론 : Query DSL로 동적 쿼리 작성(마지막 장에서 다룰 예정)*/
 }
