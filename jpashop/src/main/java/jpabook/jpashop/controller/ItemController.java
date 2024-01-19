@@ -70,16 +70,22 @@ public class ItemController {
 
     //TODO: 왜 update가 아니라 insert를 하지? 문제점 찾아 수정 ㄱㄱ
     @PostMapping("items/{itemId}/edit")
-    public String updateItem(@ModelAttribute("form") BookForm form, @PathVariable String itemId) {
+    public String updateItem(@ModelAttribute("form") BookForm form, @PathVariable Long itemId) {
 //        Book book = Book.createBook(form);
-        Book book = new Book();
-        book.setId(form.getId());
-        book.setName(form.getName());
-        book.setPrice(form.getPrice());
-        book.setStockQuantity(form.getStockQuantity());
-        book.setAuthor(form.getAuthor());
-        book.setIsbn(form.getIsbn());
-        itemService.save(book);
+
+        // 💡어설프게 엔티티를 파라미터로 쓰지 말고, 파라미터로 받아라.
+//        /* 준영속 엔티티 == JPA가 관리 하지 않음(변경감지X)*/
+//        Book book = new Book();
+//        book.setId(form.getId());
+//        book.setName(form.getName());
+//        book.setPrice(form.getPrice());
+//        book.setStockQuantity(form.getStockQuantity());
+//        book.setAuthor(form.getAuthor());
+//        book.setIsbn(form.getIsbn());
+//        itemService.save(book); // 이 로직이 없으면 업데이트 불가능
+
+        itemService.updateItem(itemId, form.getName(), form.getPrice(), form.getStockQuantity());
+
         return "redirect:/items"; // 수정 후, 책 목록으로 리디렉션
     }
 }

@@ -14,8 +14,6 @@ public class BookForm {
     private String name;
     private int price;
     private int stockQuantity;
-
-    /*About book*/
     private String author;
     private String isbn;
 }

@@ -1,5 +1,6 @@
 package jpabook.jpashop.service;
 
+import jpabook.jpashop.domain.item.Book;
 import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,18 @@ public class ItemService {
     @Transactional /*(readOnly = false)*/
     public void save(Item item) {
         itemRepository.save(item);
+    }
+
+    @Transactional
+    public void updateItem(Long itemId, String name, int price, int stockQuantity) {
+        Item findItem = itemRepository.findOne(itemId); // ID 기반으로 실제 DB에 있는 '영속상태 엔티티'르 찾아옴.
+        //findItem.change(..,...,..); 와 같이 엔티티에 의미있는 비즈니스 로직으로 하세요.
+
+        findItem.setName(name);
+        findItem.setPrice(price);
+        findItem.setStockQuantity(stockQuantity);
+        /* Dirty Checking으로 자동으로 JPA가 업데이트 해줌 (좋은 방법) */
+        /* Merge와 달리 업데이트 칠 필드들만 변경 감지하여 선택저으로 변경 가능 */
     }
 
     public List<Item> findItems() {
