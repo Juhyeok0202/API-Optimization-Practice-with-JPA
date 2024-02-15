@@ -5,6 +5,7 @@ import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.order.simpleQuery.OrderSimpleQueryRepository;
 import jpabook.jpashop.service.OrderService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,6 +32,7 @@ import static java.util.stream.Collectors.*;
 public class OrderSimpleApiController {
 
     private final OrderRepository orderRepository;
+    private final OrderSimpleQueryRepository orderSimpleQueryRepository;
 
     @GetMapping("/api/v1/simple-orders")
     public List<Order> ordersV1() {
@@ -60,7 +62,7 @@ public class OrderSimpleApiController {
     }
 
     @GetMapping("/api/v3/simple-orders")
-    public Result ordersV3() {
+    public Result ordersV3() { //🌟재사용성이 좋음
         List<Order> orders = orderRepository.findAllWithMemberDelivery();
 
         List<SimpleOrderDto> collect = orders.stream()
@@ -69,10 +71,22 @@ public class OrderSimpleApiController {
 
         return new Result(collect);
     }
+    /*V3와 V4는 서로 trade-off가 존재*/
+    /*
+    v3: Order format으로 조회하여 다양한 api에서 활용가능 + 엔티티를 반환했기에 조작 가능
+    v4: 특정 Dto format으로 fit한 조회라서 해당 DTO전용임 + 쿼리최적화(생각보다 미비) + DTO반환이기에 데이터 조작 불가능(JPA가 관리 불가능) + 코드 지저분
+     */
+    @GetMapping("/api/v4/simple-orders")
+    public Result ordersV4() { //🌟재사용성이 떨어짐.(해당 DTO전용)
+        // select 절에서 원하는 것만 조회해옴. v3보다 select 절이 최적화됨.(네트워크를 덜 사용)
+        // 페치조인은 동일
+        return new Result(orderSimpleQueryRepository.findOrderDtos());
+    }
 
     @Data
     @AllArgsConstructor
     static class Result<T> {
+        //API 스펙의 유연성을 위함
         private T data;
     }
 
