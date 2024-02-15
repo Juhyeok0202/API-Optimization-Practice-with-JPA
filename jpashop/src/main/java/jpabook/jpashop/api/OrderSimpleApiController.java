@@ -1,14 +1,23 @@
 package jpabook.jpashop.api;
 
+import jpabook.jpashop.domain.Address;
 import jpabook.jpashop.domain.Order;
+import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
 import jpabook.jpashop.service.OrderService;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 
 /**
  * ToMany관계는 컬렉션이기에 복잡.
@@ -35,4 +44,43 @@ public class OrderSimpleApiController {
         }
         return all;
     }
+
+    @GetMapping("/api/v2/simple-orders")
+    public Result ordersV2() {
+        //Order 조회 Query -> 2건 조회
+        //N + 1 -> 1 + 회원 N + 배송 N
+        List<Order> orders = orderRepository.findAllByString(new OrderSearch());
+
+        //2건 -> 루프 2회
+        List<SimpleOrderDto> collect = orders.stream()
+                .map(SimpleOrderDto::new)
+                .collect(toList());
+
+        return new Result(collect);
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class Result<T> {
+        private T data;
+    }
+
+    @Data
+    static class SimpleOrderDto {
+        private Long orderId;
+        private String name;
+        private LocalDateTime orderDate;
+        private OrderStatus orderStatus;
+        private Address address;
+
+        public SimpleOrderDto(Order order) {
+            // 중요하지 않은 Dto에서 Entity를 노출시키는 것은 상관 X
+            orderId = order.getId();
+            name = order.getMember().getName(); //LAZY 초기화시점(영속성 컨텍스트에 없으니 DB에서 끌고옴)
+            orderDate = order.getOrderDate();
+            orderStatus = order.getStatus();
+            address = order.getDelivery().getAddress(); //LAZY 초기화시점(영속성 컨텍스트에 없으니 DB에서 끌고옴)
+        }
+    }
+
 }
