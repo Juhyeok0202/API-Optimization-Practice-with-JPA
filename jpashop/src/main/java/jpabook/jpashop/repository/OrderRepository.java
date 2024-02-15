@@ -90,5 +90,13 @@ public class OrderRepository {
         return query.getResultList();
     }
 
+    public List<Order> findAllWithMemberDelivery() { //Fetch Join
+        return em.createQuery(
+                "select o from Order o" +
+                        " join fetch o.member m" +
+                        " join fetch o.delivery d" ,Order.class
+                ).getResultList();
+    }
+
     /*결론 : Query DSL로 동적 쿼리 작성(마지막 장에서 다룰 예정)*/
 }
