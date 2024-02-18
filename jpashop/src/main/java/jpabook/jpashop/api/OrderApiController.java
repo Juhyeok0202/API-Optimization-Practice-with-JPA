@@ -6,6 +6,7 @@ import jpabook.jpashop.domain.OrderItem;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.order.query.OrderQueryRepository;
 import jpabook.jpashop.util.ProxyUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,6 +29,7 @@ import static java.util.stream.Collectors.toList;
 public class OrderApiController {
 
     private final OrderRepository orderRepository;
+    private final OrderQueryRepository orderQueryRepository;
     private final ProxyUtil proxyUtil;
 
     @GetMapping("/api/v1/orders")
@@ -93,6 +95,12 @@ https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_Use
         //V3 보다 네트워크 전송량 자체는 적다. 또 Paging도 가능(paging은 선택권이 없음)
         //극단적으로 10,000건 조회 정도로 생각해보면, V3는 중복 데이터때문에 V3.1이 오히려 최적화 되었다고 볼 수 있다.
         //트레이드 오프 관계를 잘 생각하고, Fetch Join OR Batch_Size 중 해결방법을 결정
+    }
+
+    @GetMapping("/api/v4/orders")
+    public Result ordersV4() { //List<OrderQueryDto>
+        // N+1 문제 존재
+        return new Result(orderQueryRepository.findOrderQueryDtos());
     }
 
     @Data
