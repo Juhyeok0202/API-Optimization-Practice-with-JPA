@@ -101,7 +101,7 @@ public class OrderRepository {
     public List<Order> findAllWithItem() {
         /*XToMany 관계에서의 컬렉션 조회를 해결하자.*/
         /*OneToMany Fetch Join -> Paging이 불가능(Memory Paging을 함.)*/
-        /*N 쪽인 OrderITem 기준 조회가 된다고 생각하면 된다.(따라서, N이 1개 일 때만 사용)*/
+        /*N 쪽인 OrderITem 기준 paging 된다고 생각하면 된다.(따라서, N이 1개 일 때만 사용)*/
         return em.createQuery( // 이렇게 복잡한 쿼리는 QueryDSL로 하는 편이 좋다.
                 "select distinct o from Order o" + // ①.DB에 Distinct 키워드 쿼리 ②.엔티티가 중복인 경우에 걸러서 담아줌
                         " join fetch o.member m" + // ManyToOne => 데이터 뻥튀기 X
@@ -110,6 +110,17 @@ public class OrderRepository {
                         " join fetch oi.item i", Order.class)
                 .setFirstResult(1)
                 .setMaxResults(100)
+                .getResultList();
+    }
+
+    public List<Order> findAllWithMemberDelivery(int offset, int limit) {
+        return em.createQuery(
+                // ToOne 관계도 join fetch 안해줘도 Batch Size로 최적화가 가능하나, 네트워크를 2번 더 타게 된다. (24.02.18 Hibernate5 기준)
+                "select o from Order o" +
+                        " join fetch o.member m" +
+                        " join fetch o.delivery d" ,Order.class)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
                 .getResultList();
     }
 

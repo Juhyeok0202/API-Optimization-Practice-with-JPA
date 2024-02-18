@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -66,17 +67,32 @@ Hibernate 6버전은 페치 조인 사용 시 자동으로 중복 제거를 하�
 https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_User_Guide.html#hql-distinct
          */
         List<Order> orders = orderRepository.findAllWithItem();
-
-        for (Order order : orders) {
-            //distinct 적용하지
-            System.out.println("order ref = " + order + "id = " + order.getId());
-        }
-
         List<OrderDto> result = orders.stream()
                 .map(OrderDto::new)
                 .collect(toList());
 
         return new Result(result);
+        //결국 SQL이 나가기 때문에 네트워크를 많이 쓰긴 하는 것이 단점
+    }
+
+    @GetMapping("/api/v3.1/orders")
+    public Result ordersV3_page(
+            @RequestParam(value = "offset", defaultValue = "0") int offset,
+            @RequestParam(value = "limit", defaultValue = "100") int limit)
+    {   //페이징을 위해 BatchSize를 설정하여 LAZY초기화로 인한 단건 조회를 In절로 최적화한다.
+        //1 N M을 1 1 1로 만들어버리는 엄청난 최적화
+        //고객 실시간 정보를 빠르게 하려면 캐시 Redis or DB에 정규화해서 놓거나(플랫하게 한 줄로)
+
+        List<Order> orders = orderRepository.findAllWithMemberDelivery(offset,limit);
+        List<OrderDto> result = orders.stream()
+                .map(OrderDto::new)
+                .collect(toList());
+
+        return new Result(result);
+        //V3 보다 네트워크 호출은 많지만,
+        //V3 보다 네트워크 전송량 자체는 적다. 또 Paging도 가능(paging은 선택권이 없음)
+        //극단적으로 10,000건 조회 정도로 생각해보면, V3는 중복 데이터때문에 V3.1이 오히려 최적화 되었다고 볼 수 있다.
+        //트레이드 오프 관계를 잘 생각하고, Fetch Join OR Batch_Size 중 해결방법을 결정
     }
 
     @Data
