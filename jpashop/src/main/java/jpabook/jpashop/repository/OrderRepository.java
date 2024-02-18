@@ -98,6 +98,21 @@ public class OrderRepository {
                 ).getResultList();
     }
 
+    public List<Order> findAllWithItem() {
+        /*XToMany 관계에서의 컬렉션 조회를 해결하자.*/
+        /*OneToMany Fetch Join -> Paging이 불가능(Memory Paging을 함.)*/
+        /*N 쪽인 OrderITem 기준 조회가 된다고 생각하면 된다.(따라서, N이 1개 일 때만 사용)*/
+        return em.createQuery( // 이렇게 복잡한 쿼리는 QueryDSL로 하는 편이 좋다.
+                "select distinct o from Order o" + // ①.DB에 Distinct 키워드 쿼리 ②.엔티티가 중복인 경우에 걸러서 담아줌
+                        " join fetch o.member m" + // ManyToOne => 데이터 뻥튀기 X
+                        " join fetch o.delivery d"+ // OneToOne => 데이터 뻥튀기 X
+                        " join fetch o.orderItems oi"+ //orderItems 4개. Order 2개 => Order가 DB입장에서 4개가 되어버림
+                        " join fetch oi.item i", Order.class)
+                .setFirstResult(1)
+                .setMaxResults(100)
+                .getResultList();
+    }
+
 
 
     /*결론 : Query DSL로 동적 쿼리 작성(마지막 장에서 다룰 예정)*/

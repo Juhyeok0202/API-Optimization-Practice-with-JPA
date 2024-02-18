@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -59,6 +58,27 @@ public class OrderApiController {
         return new Result(collect);
     }
 
+    @GetMapping("/api/v3/orders")
+    public Result ordersV3() {
+        /*
+JPA 구현체로 Hibernate를 사용하는데, 스프링 부트 3버전 부터는 Hibernate 6 버전을 사용하고 있습니다 :)
+Hibernate 6버전은 페치 조인 사용 시 자동으로 중복 제거를 하도록 변경되었다고 합니다.
+https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_User_Guide.html#hql-distinct
+         */
+        List<Order> orders = orderRepository.findAllWithItem();
+
+        for (Order order : orders) {
+            //distinct 적용하지
+            System.out.println("order ref = " + order + "id = " + order.getId());
+        }
+
+        List<OrderDto> result = orders.stream()
+                .map(OrderDto::new)
+                .collect(toList());
+
+        return new Result(result);
+    }
+
     @Data
     static class OrderDto {
         /*
@@ -70,7 +90,7 @@ public class OrderApiController {
         private LocalDateTime orderDate;
         private OrderStatus orderStatus;
         private Address address;
-        private List<OrderItemDto> orderItems; //✅
+        private List<OrderItemDto> orderItems; // 엔티티는 DTO로 다시 한번 래핑이 필요하다.
         //        private List<OrderItem> orderItems; //OrderItem 조차도 DTO로 변환 필수(엔티티 스펙)
 
         public OrderDto(Order order) {
