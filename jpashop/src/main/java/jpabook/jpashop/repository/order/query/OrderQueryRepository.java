@@ -79,4 +79,18 @@ public class OrderQueryRepository {
                 .getResultList();
     }
 
+    public List<OrderFlatDto> findAllByDto_flat() {
+        // DTO format을 바꾸어 모두 한 번에 가져오는 쿼리로
+        // Query 1번
+        // Paging불가능
+        return em.createQuery(
+                        "select distinct new" +
+                                " jpabook.jpashop.repository.order.query.OrderFlatDto(o.id, m.name, o.orderDate, o.status, d.address, i.name, oi.orderPrice, oi.count)" +
+                                " from Order o" +
+                                " join o.member m" +
+                                " join o.delivery d" +
+                                " join o.orderItems oi" + // 데이터 뻥튀기 (일대다 조인)
+                                " join oi.item i", OrderFlatDto.class)
+                .getResultList();
+    }
 }

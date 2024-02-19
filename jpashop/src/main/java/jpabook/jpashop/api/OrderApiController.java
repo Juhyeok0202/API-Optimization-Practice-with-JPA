@@ -6,6 +6,9 @@ import jpabook.jpashop.domain.OrderItem;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.order.query.OrderFlatDto;
+import jpabook.jpashop.repository.order.query.OrderItemQueryDto;
+import jpabook.jpashop.repository.order.query.OrderQueryDto;
 import jpabook.jpashop.repository.order.query.OrderQueryRepository;
 import jpabook.jpashop.util.ProxyUtil;
 import lombok.AllArgsConstructor;
@@ -19,8 +22,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 @RestController
@@ -108,6 +115,31 @@ https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_Use
         return new Result(orderQueryRepository.findAllByDto_optimization());
     }
 
+    @GetMapping("/api/v6/orders")
+    public List<OrderQueryDto> ordersV6() {
+        List<OrderFlatDto> orderFlats = orderQueryRepository.findAllByDto_flat();
+
+        Map<Long, List<OrderItemQueryDto>> orderItemMap = new HashMap<>();
+        Map<Long, OrderQueryDto> orderMap = new HashMap<>();
+
+        orderFlats.forEach(orderFlat -> {
+            Long orderId = orderFlat.getOrderId();
+            if (orderMap.get(orderId) == null) {
+                orderMap.put(orderId, new OrderQueryDto(orderId, orderFlat.getName(), orderFlat.getOrderDate(), orderFlat.getOrderStatus(), orderFlat.getAddress()));
+            }
+
+            if (orderItemMap.get(orderId) == null) {
+                orderItemMap.put(orderId, new ArrayList<OrderItemQueryDto>());
+            }
+            orderItemMap.get(orderId).add(new OrderItemQueryDto(orderId, orderFlat.getItemName(), orderFlat.getOrderPrice(), orderFlat.getCount()));
+        });
+
+        orderItemMap.forEach((orderId, orderItem) -> {
+            orderMap.get(orderId).setOrderItems(orderItem);
+        });
+
+        return new ArrayList<OrderQueryDto>(orderMap.values());
+    }
     @Data
     static class OrderDto {
         /*
