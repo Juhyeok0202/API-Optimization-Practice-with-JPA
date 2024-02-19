@@ -103,6 +103,11 @@ https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_Use
         return new Result(orderQueryRepository.findOrderQueryDtos());
     }
 
+    @GetMapping("/api/v5/orders")
+    public Result ordersV5() {
+        return new Result(orderQueryRepository.findAllByDto_optimization());
+    }
+
     @Data
     static class OrderDto {
         /*

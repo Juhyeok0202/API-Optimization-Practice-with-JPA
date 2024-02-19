@@ -1,11 +1,12 @@
 package jpabook.jpashop.repository.order.query;
 
 import jakarta.persistence.EntityManager;
-import jpabook.jpashop.api.OrderApiController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -22,6 +23,41 @@ public class OrderQueryRepository {
         });
 
         return result;
+    }
+
+
+    public List<OrderQueryDto> findAllByDto_optimization() {
+        List<OrderQueryDto> result = findOrders();
+
+        // 한방 쿼리로 + Map을 사용하여 값 세팅 O(1)로 최적화
+        Map<Long, List<OrderItemQueryDto>> orderItemMap = findOrderItemMap(toOrderIds(result));
+
+        // 메모리에서 찾아 매칭을 해서 컬렉션 값 세팅
+        result.forEach(o -> o.setOrderItems(orderItemMap.get(o.getOrderId())));
+
+        return result;
+    }
+
+    private Map<Long, List<OrderItemQueryDto>> findOrderItemMap(List<Long> orderIds) {
+        List<OrderItemQueryDto> orderItem = em.createQuery(
+                        "select new jpabook.jpashop.repository.order.query.OrderItemQueryDto(oi.order.id ,i.name, oi.orderPrice, oi.count)" +
+                                " from OrderItem oi" +
+                                " join oi.item i" +
+                                " where oi.order.id in :orderIds", OrderItemQueryDto.class)
+                .setParameter("orderIds", orderIds)
+                .getResultList();
+
+
+        // 메모리에 Map으로 가져온 다음 (루프로 돌려도 되지만, 편하도록)
+        Map<Long, List<OrderItemQueryDto>> orderItemMap = orderItem.stream()
+                .collect(Collectors.groupingBy(orderItemQueryDto -> orderItemQueryDto.getOrderId()));
+        return orderItemMap;
+    }
+
+    private List<Long> toOrderIds(List<OrderQueryDto> result) {
+        return result.stream()
+                .map(o -> o.getOrderId())
+                .collect(Collectors.toList());
     }
 
     private List<OrderItemQueryDto> findOrderItems(Long orderId) {
@@ -42,4 +78,5 @@ public class OrderQueryRepository {
                                 " join o.delivery d", OrderQueryDto.class)
                 .getResultList();
     }
+
 }
