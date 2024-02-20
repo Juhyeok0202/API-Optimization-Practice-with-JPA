@@ -29,7 +29,7 @@ public class OrderQueryRepository {
     public List<OrderQueryDto> findAllByDto_optimization() {
         List<OrderQueryDto> result = findOrders();
 
-        // 한방 쿼리로 + Map을 사용하여 값 세팅 O(1)로 최적화
+        // 한방 쿼리로 + Map을 사용하여 값 세팅 O(1)로 최적화(일단 메모리에 전부 올려놓고 -> 한방 쿼리)
         Map<Long, List<OrderItemQueryDto>> orderItemMap = findOrderItemMap(toOrderIds(result));
 
         // 메모리에서 찾아 매칭을 해서 컬렉션 값 세팅

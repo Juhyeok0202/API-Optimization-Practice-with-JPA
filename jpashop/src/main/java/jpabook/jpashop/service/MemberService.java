@@ -2,8 +2,8 @@ package jpabook.jpashop.service;
 
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.repository.MemberRepository;
+import jpabook.jpashop.repository.MemberRepositoryOld;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; //Javax도 있지만, 스프링 것이 옵션이 더 많음(권장)
 
@@ -45,12 +45,12 @@ public class MemberService {
 
 //    @Transactional(readOnly = true)
     public Member findOne(Long memberId) {
-        return memberRepository.findOne(memberId);
+        return memberRepository.findById(memberId).get();
     }
 
     @Transactional
     public void update(Long id, String name) {
-        Member member = memberRepository.findOne(id); // from DB. member가 영속상태
+        Member member = memberRepository.findById(id).get(); // from DB. member가 영속상태
         member.setName(name); //Dirty Checking으로 변경
     }
 }

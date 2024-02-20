@@ -40,7 +40,7 @@ public class OrderApiController {
     private final ProxyUtil proxyUtil;
 
     @GetMapping("/api/v1/orders")
-    public List<Order> ordersV1() {
+    public List<Order> ordersV1() { //엔티티를 조회해서 그대로 반환
         List<Order> all = orderRepository.findAllByString(new OrderSearch());
         for (Order order : all) {
             order.getMember().getName(); //Member LAZY 초기화
@@ -59,7 +59,7 @@ public class OrderApiController {
     }
 
     @GetMapping("/api/v2/orders")
-    public Result ordersV2() {
+    public Result ordersV2() { //엔티티 조회 후 DTO로 변환
         //Order 조회( 2개 )
         List<OrderDto> collect = orderRepository.findAllByString(new OrderSearch()).stream()
                 .map(OrderDto::new)
@@ -69,7 +69,7 @@ public class OrderApiController {
     }
 
     @GetMapping("/api/v3/orders")
-    public Result ordersV3() {
+    public Result ordersV3() { //페치 조인으로 쿼리 수 최적화
         /*
 JPA 구현체로 Hibernate를 사용하는데, 스프링 부트 3버전 부터는 Hibernate 6 버전을 사용하고 있습니다 :)
 Hibernate 6버전은 페치 조인 사용 시 자동으로 중복 제거를 하도록 변경되었다고 합니다.
@@ -85,7 +85,7 @@ https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_Use
     }
 
     @GetMapping("/api/v3.1/orders")
-    public Result ordersV3_page(
+    public Result ordersV3_page( //컬렉션 페이징과 한계 돌파
             @RequestParam(value = "offset", defaultValue = "0") int offset,
             @RequestParam(value = "limit", defaultValue = "100") int limit)
     {   //페이징을 위해 BatchSize를 설정하여 LAZY초기화로 인한 단건 조회를 In절로 최적화한다.
@@ -105,18 +105,19 @@ https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_Use
     }
 
     @GetMapping("/api/v4/orders")
-    public Result ordersV4() { //List<OrderQueryDto>
+    public Result<OrderQueryDto> ordersV4() { //JPA에서 DTO를 직접 조회
+        // ✅단건 조회에서는 v5,6로 넘어갈 이유 X
         // N+1 문제 존재
         return new Result(orderQueryRepository.findOrderQueryDtos());
     }
 
     @GetMapping("/api/v5/orders")
-    public Result ordersV5() {
+    public Result<OrderQueryDto> ordersV5() { //컬렉션 조회 최적화 - 일대다 관계인 컬렉션은 IN 절을 활용해서 메모리에 미리 조회해서 최적화
         return new Result(orderQueryRepository.findAllByDto_optimization());
     }
 
     @GetMapping("/api/v6/orders")
-    public List<OrderQueryDto> ordersV6() {
+    public List<OrderQueryDto> ordersV6() { //플랫 데이터 최적화 - JOIN 결과를 그대로 조회 후 애플리케이션에서 원하는 모양으로 직접 변환
         List<OrderFlatDto> orderFlats = orderQueryRepository.findAllByDto_flat();
 
         Map<Long, List<OrderItemQueryDto>> orderItemMap = new HashMap<>();
